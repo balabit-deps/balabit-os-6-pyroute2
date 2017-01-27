@@ -25,16 +25,21 @@ TC_RED_ADAPTATIVE = 4
 
 TIME_UNITS_PER_SEC = 1000000
 
-_psched = open('/proc/net/psched', 'r')
-[_t2us,
- _us2t,
- _clock_res,
- _wee] = [int(i, 16) for i in _psched.read().split()]
-_clock_factor = float(_clock_res) / TIME_UNITS_PER_SEC
-_tick_in_usec = float(_t2us) / _us2t * _clock_factor
-_first_letter = re.compile('[^0-9]+')
-_psched.close()
-
+try:
+    _psched = open('/proc/net/psched', 'r')
+    [_t2us,
+     _us2t,
+     _clock_res,
+     _wee] = [int(i, 16) for i in _psched.read().split()]
+    _clock_factor = float(_clock_res) / TIME_UNITS_PER_SEC
+    _tick_in_usec = float(_t2us) / _us2t * _clock_factor
+    _first_letter = re.compile('[^0-9]+')
+    _psched.close()
+except IOError:
+    _clock_res = 0
+    _clock_factor = 1
+    _tick_in_usec = 1
+    _wee = 1000
 
 def _get_hz():
     if _clock_res == 1000000:
